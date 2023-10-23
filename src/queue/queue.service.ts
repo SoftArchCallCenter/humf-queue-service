@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UseInterceptors } from '@nestjs/common';
 import { Order } from 'humf-proto/build/proto/queue';
 import { RedisService } from 'src/redis/redis.service';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @Injectable()
 export class QueueService {
@@ -9,6 +10,7 @@ export class QueueService {
         private readonly redisService: RedisService
     ) {}
 
+    @UseInterceptors(CacheInterceptor)
     async createOrder(order:Order){
         const resId = order.resId;
         const kitchen:Order[] = await this.redisService.get(`kitchen_${resId}`) as Order[];
