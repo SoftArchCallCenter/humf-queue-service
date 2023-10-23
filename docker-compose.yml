@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  rabbitMQ:
+    image: rabbitmq:3-management
+    container_name: order-kitchen-rabbitMQ
+    ports:
+      - 5672:5627
+      - 8080:15672
