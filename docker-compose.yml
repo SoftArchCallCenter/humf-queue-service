@@ -1,9 +1,10 @@
 version: '3.8'
 
 services:
-  rabbitMQ:
-    image: rabbitmq:3-management
-    container_name: order-kitchen-rabbitMQ
+  redis:
+    image: bitnami/redis:6.2.14-debian-11-r0
+    container_name: redis
+    env_file:
+      - .env
     ports:
-      - 5672:5627
-      - 8080:15672
+      - 6379:6379
