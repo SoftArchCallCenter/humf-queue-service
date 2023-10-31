@@ -8,3 +8,22 @@ services:
       - .env
     ports:
       - 6379:6379
+
+  queue-service:
+    build: ./
+    container_name: queue-service
+    env_file:
+      - .env
+    ports:
+      - ${QUEUE_SERVICE_PORT}:${QUEUE_SERVICE_PORT}
+    depends_on:
+      - redis
+    volumes:
+      - ./src:/app/src
+    command: npm run start:dev
+    networks:
+      - default
+
+networks:
+  humf-service-network:
+    external: true
