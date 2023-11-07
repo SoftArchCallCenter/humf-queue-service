@@ -11,6 +11,15 @@ export class RedisService {
         return await this.cache.get(key);
     }
 
+    async getQueueHead(key: string){
+        const value:unknown[] = await this.cache.get(key);
+        if(value){
+            const order = value[0];
+            return order
+        }
+        return null
+    }
+
     async set(key:string, value: unknown){
         console.log(`SET ${key} from REDIS`);
         await this.cache.set(key, value,0);
@@ -24,5 +33,20 @@ export class RedisService {
     async createQueue(key: string, value:unknown){
         console.log(`CREATE ${key} queue from REDIS`);
         this.cache.set(key, value, 0)
+    }
+
+    async consumeQueue(key:string){
+        const value:unknown[] = await this.cache.get(key);
+        if(value){
+            const order = value[0];
+            if (value.length === 1){
+                await this.del(key)   
+            } else {
+                value.shift()
+                await this.set(key, value)
+            }
+            return order
+        }
+        return null
     }
 }

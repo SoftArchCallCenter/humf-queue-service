@@ -23,7 +23,8 @@ services:
     command: npm run start:dev
     networks:
       - default
+      - humf-kitchen-service_humf-service-network
 
 networks:
-  humf-service-network:
+  humf-kitchen-service_humf-service-network:
     external: true
