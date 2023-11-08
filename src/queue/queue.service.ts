@@ -1,13 +1,13 @@
-import { Injectable, Inject, UseInterceptors } from '@nestjs/common';
+import { Injectable, Inject, UseInterceptors, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { AcceptOrderDto, Order, RestaurantId } from 'humf-proto/build/proto/queue';
 import { RedisService } from 'src/redis/redis.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { KitchenServiceClient } from 'humf-proto/build/proto/kitchen';
-import { map } from 'rxjs';
+import { map, lastValueFrom } from 'rxjs';
 
 @Injectable()
-export class QueueService {
+export class QueueService  implements OnModuleInit {
 
     private kitchenService: KitchenServiceClient;
 
@@ -17,7 +17,7 @@ export class QueueService {
     ) {}
 
     onModuleInit() {
-        this.kitchenService = this.client.getService<KitchenServiceClient>("KitchenService")
+        this.kitchenService = this.client.getService<KitchenServiceClient>("KitchenService");
     }
 
     @UseInterceptors(CacheInterceptor)
@@ -47,13 +47,10 @@ export class QueueService {
     async acceptOrder(acceptOrderDto: AcceptOrderDto){
         const order:Order = await this.redisService.consumeQueue(`kitchen_${acceptOrderDto.resId}`) as Order | null;
         if (order){
-            console.log(`there is a order : ${order}`)
             if (acceptOrderDto.accept){
-                console.log(`accept order : ${order}`)
-                this.kitchenService.createTicket(order).pipe(map((result => {
-                    console.log(result)
-                })));
-                console.log(`-------------------------`)
+                await lastValueFrom(
+                    this.kitchenService.createTicket(order).pipe(map(res => console.log(res)))
+                )
             }
             return order
         }
