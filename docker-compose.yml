@@ -6,11 +6,20 @@ services:
     container_name: redis
     env_file:
       - .env
+    environment:
+      - REDIS_PASSWORD=${QUEUE_SERVICE_REDIS_PASSWORD}
     ports:
       - 6379:6379
+    expose:
+      - 6379
+    volumes:
+      - redis_data:/bitnami/redis/data
+    networks:
+      - humf-service-network
 
   queue-service:
     build: ./
+    image: queue-service:1.0
     container_name: queue-service
     env_file:
       - .env
@@ -18,14 +27,14 @@ services:
       - ${QUEUE_SERVICE_PORT}:${QUEUE_SERVICE_PORT}
     depends_on:
       - redis
-    volumes:
-      - ./src:/app/src
     command: npm run start:dev
     networks:
-      - default
       - humf-service-network
+
+volumes:
+  redis_data:
+    external: false
 
 networks:
   humf-service-network:
     name: humf-service-network
-    external: true
